@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.caffinitas.ohc:ohc-core:0.4.2">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.caffinitas.ohc/ohc-core/0.4.2/acfb58f4315f5bc0364219ae75523ee1733aeb17/ohc-core-0.4.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.caffinitas.ohc/ohc-core/0.4.2/56c35719a0ec259fc0808b234f344cdc53dd2185/ohc-core-0.4.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
