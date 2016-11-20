@@ -21,9 +21,13 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 
+	    final int ROW_COUNT = 5;
+        final int COL_COUNT = 5;
+        final int MAP_ID = 1;
+
 		UsersSession session = new UsersSession("127.0.0.1");
 		
-		session.upsertUser("PP", "Adam", 609, "A St");
+		/*session.upsertUser("PP", "Adam", 609, "A St");
 		session.upsertUser("PP", "Ola", 509, null);
 		session.upsertUser("UAM", "Ewa", 720, "B St");
 		session.upsertUser("PP", "Kasia", 713, "C St");
@@ -31,7 +35,13 @@ public class Main {
 		String output = session.selectAll();
 		System.out.println("Users: \n" + output);
 		
-		session.deleteAll();
+		session.deleteAll();*/
+		for (int i = 0; i < ROW_COUNT; i++) {
+		    for (int j = 0; j < COL_COUNT; j++) {
+                session.insertUsersPosition(MAP_ID, i, j, 0);
+            }
+        }
+
 		
 		System.exit(0);
 		

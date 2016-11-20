@@ -1,0 +1,12 @@
+CREATE KEYSPACE IF NOT EXISTS EvacSim
+  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 4 };
+
+USE EvacSim;
+
+CREATE TABLE Map (
+  mapId int,
+  rowId int,
+  colId int,
+  user int,
+  PRIMARY KEY ((mapId, rowId), colId)
+);

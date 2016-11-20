@@ -21,6 +21,8 @@
     <bytecodeTargetLevel>
       <module name="CassandraDemo_main" target="1.8" />
       <module name="CassandraDemo_test" target="1.8" />
+      <module name="EvacuationSimulator_main" target="1.8" />
+      <module name="EvacuationSimulator_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

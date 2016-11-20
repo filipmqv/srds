@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CassandraDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/CassandraDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CassandraDemo_main.iml" filepath="$PROJECT_DIR$/.idea/modules/CassandraDemo_main.iml" group="CassandraDemo" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/CassandraDemo_test.iml" filepath="$PROJECT_DIR$/.idea/modules/CassandraDemo_test.iml" group="CassandraDemo" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EvacuationSimulator.iml" filepath="$PROJECT_DIR$/.idea/modules/EvacuationSimulator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EvacuationSimulator_main.iml" filepath="$PROJECT_DIR$/.idea/modules/EvacuationSimulator_main.iml" group="EvacuationSimulator" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EvacuationSimulator_test.iml" filepath="$PROJECT_DIR$/.idea/modules/EvacuationSimulator_test.iml" group="EvacuationSimulator" />
     </modules>
   </component>
 </project>

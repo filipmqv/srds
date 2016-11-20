@@ -48,24 +48,28 @@ public class UsersSession {
 		prepareStatements();
 	}
 
-	private static PreparedStatement SELECT_ALL_FROM_USERS;
+	/*private static PreparedStatement SELECT_ALL_FROM_USERS;
 	private static PreparedStatement INSERT_INTO_USERS;
-	private static PreparedStatement DELETE_ALL_FROM_USERS;
+	private static PreparedStatement DELETE_ALL_FROM_USERS;*/
+
+	private static PreparedStatement INSERT_INTO_MAP;
 
 	private static final String USER_FORMAT = "- %-10s  %-16s %-10s %-10s\n";
 	private static final SimpleDateFormat df = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
 
 	private void prepareStatements() {
-		SELECT_ALL_FROM_USERS = session.prepare(
+		/*SELECT_ALL_FROM_USERS = session.prepare(
 				"SELECT * FROM users;");
 		INSERT_INTO_USERS = session.prepare(
 						"INSERT INTO users (companyName, name, phone, street) VALUES (?, ?, ?, ?);");
-		DELETE_ALL_FROM_USERS = session.prepare("TRUNCATE users;");
+		DELETE_ALL_FROM_USERS = session.prepare("TRUNCATE users;");*/
+
+		INSERT_INTO_MAP = session.prepare("INSERT INTO Map (mapId, rowId, colId, user) VALUES (?, ?, ?, ?);");
 		logger.info("Statements prepared");
 	}
 
-	public String selectAll() {
+	/*public String selectAll() {
 		StringBuilder builder = new StringBuilder();
 		BoundStatement bs = new BoundStatement(SELECT_ALL_FROM_USERS);
 		ResultSet rs = session.execute(bs);
@@ -80,22 +84,31 @@ public class UsersSession {
 		}
 		
 		return builder.toString();
-	}
+	}*/
 
-	public void upsertUser(String companyName, String name, int phone, String street) {
+	/*public void upsertUser(String companyName, String name, int phone, String street) {
 		BoundStatement bs = new BoundStatement(INSERT_INTO_USERS);
 		bs.bind(companyName, name, phone, street);
 		session.execute(bs);
 		
 		logger.info("User " + name + " upserted");
+	}*/
+
+	public void insertUsersPosition(int mapId, int rowId, int colId, int user) {
+		BoundStatement bs = new BoundStatement(INSERT_INTO_MAP);
+		bs.bind(mapId, rowId, colId, user);
+		session.execute(bs);
+
+		logger.info("User " + user + " upserted to position: row=" + rowId + " col=" + colId);
 	}
 
-	public void deleteAll() {
+
+	/*public void deleteAll() {
 		BoundStatement bs = new BoundStatement(DELETE_ALL_FROM_USERS);
 		session.execute(bs);
 		
 		logger.info("All users deleted");
-	}
+	}*/
 
 	protected void finalize() {
 		try {
