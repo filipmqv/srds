@@ -45,7 +45,6 @@ public class Main {
     };
     
     private static void initMap(UsersSession session) {
-        int mapIndex = 0;
         for (int i = 0; i < ROW_COUNT; i++) {
             for (int j = 0; j < COL_COUNT; j++) {
                 session.insertPosition(MAP_ID, i, j, MAP[i][j]);
@@ -54,14 +53,11 @@ public class Main {
     }
 
     private static void clearEntryPoints(UsersSession session) {
-        int mapIndex = 0;
         for (int i = 0; i < ROW_COUNT; i++) {
             for (int j = 0; j < COL_COUNT; j++) {
-                if (MAP[i][j] == -3) {
-                    MAP[i][j] = 0;
-                    session.insertPosition(MAP_ID, i, j, MAP[i][j]);
+                if (session.checkPosition(MAP_ID, i, j) == -3) {
+                    session.insertPosition(MAP_ID, i, j, 0);
                 }
-                mapIndex++;
             }
         }
     }
@@ -74,8 +70,13 @@ public class Main {
         List<Thread> users = new ArrayList<>();
 
         //place all users on map; each on different spot
-        users.add(new Thread(new User(1, 1, 1, session)));
-        session.insertPosition(MAP_ID, 1, 1, 1);
+        for (int i = 1; i < 5; i++) {
+            for (int j = 1; j < 5; j++) {
+                int userId = i*4+j;
+                users.add(new Thread(new User(userId, i, j, session)));
+                session.insertPosition(MAP_ID, i, j, userId);
+            }
+        }
 
         clearEntryPoints(session);
         

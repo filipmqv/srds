@@ -84,7 +84,7 @@ public class UsersSession {
 		bs.bind(mapId, rowId, colId, user);
 		session.execute(bs);
 
-		logger.info("User " + user + " inserted position: row=" + rowId + " col=" + colId);
+		//logger.info("User " + user + " inserted position: row=" + rowId + " col=" + colId);
 	}
 
 

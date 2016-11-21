@@ -19,17 +19,25 @@ public class Painter implements Runnable {
         this.session = session;
         colorMap.put(0, Color.AQUA);
         colorMap.put(-1, Color.BLACK);
-        colorMap.put(1, Color.RED);
+        colorMap.put(-2, Color.WHEAT);
+        colorMap.put(-3, Color.RED);
+        colorMap.put(-4, Color.CHOCOLATE);
     }
 
     public void stopMe() {
         running = false;
     }
 
+    public Color getColor(int key) {
+        return (key <= 0)
+                ? colorMap.get(key)
+                : Color.hsb((key*key*40)%270, 0.1*key%1, 0.1*key%1);
+    }
+
     private void drawSquare(GraphicsContext gc, int row, int col, int color) {
-        gc.setFill(colorMap.get(color));
+        gc.setFill(getColor(color));
         int x = 20;
-        gc.fillRect(x * row, x * col, x, x);
+        gc.fillRect(x * col, x * row, x, x);
     }
 
     @Override
