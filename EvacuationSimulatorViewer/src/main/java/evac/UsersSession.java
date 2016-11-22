@@ -2,6 +2,7 @@ package evac;
 
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 import com.datastax.driver.core.*;
 import org.slf4j.Logger;
@@ -54,13 +55,21 @@ public class UsersSession {
 	}
 
 	public int[][] selectAll() {
-		StringBuilder builder = new StringBuilder();
 		BoundStatement bs = new BoundStatement(SELECT_ALL_MAP);
 		ResultSet rs = session.execute(bs);
-        int[][] map = new int[15][15];
-		for (Row row : rs) {
-            map[row.getInt("rowId")][row.getInt("colId")] = row.getInt("user");
+        int[][] map = new int[600][600];
+		for (int i = 0; i < 600; i++) {
+			for (int j = 0; j < 600; j++) {
+				map[i][j] = -1;
+			}
 		}
+		int users = 0;
+		for (Row row : rs) {
+            map[row.getInt("rowId")][row.getInt("colId")] = row.getInt("value");
+			if (row.getInt("value") > 0)
+				users++;
+		}
+		System.out.println(users);
 
 		return map;
 	}

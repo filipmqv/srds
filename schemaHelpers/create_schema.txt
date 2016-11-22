@@ -7,6 +7,6 @@ CREATE TABLE Map (
   mapId int,
   rowId int,
   colId int,
-  user int,
+  value int,
   PRIMARY KEY ((mapId, rowId), colId)
 );

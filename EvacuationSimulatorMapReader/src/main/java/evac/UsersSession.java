@@ -43,7 +43,7 @@ public class UsersSession {
 	}
 
 	private static PreparedStatement INSERT_INTO_MAP;
-	private static PreparedStatement CHECK_POSITION;
+	private static PreparedStatement DELETE_ALL_VALUES;
 
 	private static final String USER_FORMAT = "- %-10s  %-16s %-10s %-10s\n";
 	private static final SimpleDateFormat df = new SimpleDateFormat(
@@ -51,27 +51,23 @@ public class UsersSession {
 
 	private void prepareStatements() {
 		INSERT_INTO_MAP = session.prepare("INSERT INTO Map (mapId, rowId, colId, value) VALUES (?, ?, ?, ?);");
-		CHECK_POSITION = session.prepare("SELECT value FROM Map WHERE mapId=? AND rowId=? AND colId=?;");
+		DELETE_ALL_VALUES = session.prepare("TRUNCATE Map;");
 		logger.info("Statements prepared");
-	}
-
-	public int checkValue(int mapId, int rowId, int colId) {
-		BoundStatement bs = new BoundStatement(CHECK_POSITION);
-		bs.bind(mapId, rowId, colId);
-		ResultSet rs = session.execute(bs);
-		for (Row row : rs) {
-			int value = row.getInt("value");
-			return value != -3 ? value : 0;
-		}
-		return -1;
 	}
 
 	public void insertPosition(int mapId, int rowId, int colId, int value) {
 		BoundStatement bs = new BoundStatement(INSERT_INTO_MAP);
 		bs.bind(mapId, rowId, colId, value);
 		session.execute(bs);
-		//logger.info("User " + user + " inserted position: row=" + rowId + " col=" + colId);
 	}
+
+		public void deleteAll() {
+		BoundStatement bs = new BoundStatement(DELETE_ALL_VALUES);
+		session.execute(bs);
+
+		logger.info("All users deleted");
+	}
+
 
 	protected void finalize() {
 		try {

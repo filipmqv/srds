@@ -42,8 +42,8 @@ public class User implements Runnable {
         }
 
         while (running) {
-            int right = session.checkPosition(Main.MAP_ID, row, col+1);
-            int down = session.checkPosition(Main.MAP_ID, row+1, col);
+            int right = session.checkValue(Main.MAP_ID, row, col+1);
+            int down = session.checkValue(Main.MAP_ID, row+1, col);
             if (isFinished(right, down)) {
                 // finish - immediately empty position
                 session.insertPosition(Main.MAP_ID, row, col, 0);
@@ -54,24 +54,24 @@ public class User implements Runnable {
 
             boolean chosenRight = true; // false = down chosen
             if (right == 0 && down == 0) {
-                System.out.println(id + " BOTH "+ row +" " + col +" "+ right +" "+ down);
+                //System.out.println(id + " BOTH "+ row +" " + col +" "+ right +" "+ down);
                 if (ThreadLocalRandom.current().nextInt(0, 2) == 0) {
                     session.insertPosition(Main.MAP_ID, row, col+1, id);
-                    System.out.println(id + " BOTH RIGHT "+ row +" " + col +" "+ right +" "+ down);
+                    //System.out.println(id + " BOTH RIGHT "+ row +" " + col +" "+ right +" "+ down);
                 } else {
                     chosenRight = false;
-                    System.out.println(id + " BOTH DOWN "+ row +" " + col +" "+ right +" "+ down);
+                    //System.out.println(id + " BOTH DOWN "+ row +" " + col +" "+ right +" "+ down);
                     session.insertPosition(Main.MAP_ID, row+1, col, id);
                 }
             } else if (right == 0) {
-                System.out.println(id + " RIGHT "+ row +" " + col +" "+ right +" "+ down);
+                //System.out.println(id + " RIGHT "+ row +" " + col +" "+ right +" "+ down);
                 session.insertPosition(Main.MAP_ID, row, col+1, id);
             } else if (down == 0) {
                 chosenRight = false;
-                System.out.println(id + " DOWN "+ row +" " + col +" "+ right +" "+ down);
+                //System.out.println(id + " DOWN "+ row +" " + col +" "+ right +" "+ down);
                 session.insertPosition(Main.MAP_ID, row+1, col, id);
             } else {
-                randomlySleepSafely(1, 10);
+                randomlySleepSafely(50, 100);
                 continue;
             }
 
@@ -79,18 +79,18 @@ public class User implements Runnable {
             randomlySleepSafely(10, 30);
 
             if (chosenRight) {
-                if (session.checkPosition(Main.MAP_ID, row, col+1) == id) {
-                    System.out.println(id + " REMOVE RIGHT "+ row +" " + col +" "+ right +" "+ down);
+                if (session.checkValue(Main.MAP_ID, row, col+1) == id) {
+                    //System.out.println(id + " REMOVE RIGHT "+ row +" " + col +" "+ right +" "+ down);
                     session.insertPosition(Main.MAP_ID, row, col, 0);
                     col++;
-                    randomlySleepSafely(10, 30);
+                    //randomlySleepSafely(10, 30);
                 }
             } else { // chosen down
-                if (session.checkPosition(Main.MAP_ID, row+1, col) == id) {
-                    System.out.println(id + " REMOVE DOWN "+ row +" " + col +" "+ right +" "+ down);
+                if (session.checkValue(Main.MAP_ID, row+1, col) == id) {
+                    //System.out.println(id + " REMOVE DOWN "+ row +" " + col +" "+ right +" "+ down);
                     session.insertPosition(Main.MAP_ID, row, col, 0);
                     row++;
-                    randomlySleepSafely(10, 30);
+                    //randomlySleepSafely(10, 30);
                 }
             }
         }
