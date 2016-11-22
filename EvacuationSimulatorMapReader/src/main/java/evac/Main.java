@@ -22,9 +22,9 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static int rowCount = 0;
-    public static int colCount = 0;
-    public static final int MAP_ID = 1;
+    private static int rowCount = 0;
+    private static int colCount = 0;
+    private static final int MAP_ID = 1;
     private static int[][] map;
     // (-3)=entry_pont; (-2)=goal_-_user_disappears; (-1)=wall, 0=free, 1+=occupied_by_user(id)
     // [row][col]

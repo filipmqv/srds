@@ -13,23 +13,8 @@ public class UsersSession {
 			.getLogger(UsersSession.class);
 
 	public static final String DEFAULT_CONTACT_POINT = "127.0.0.1";
-	public static UsersSession instance = null;
-	
-	private Session session;
 
-	
-	public static UsersSession getSession() {
-		if (instance != null)
-			return instance;
-		
-		synchronized (UsersSession.class)
-		{
-			if (instance == null)
-				instance = new UsersSession(null);
-		}
-		
-		return instance;
-	}
+	private Session session;
 	
 	public UsersSession(String contactPoint) {
 		if (contactPoint == null || contactPoint.isEmpty())
@@ -45,7 +30,6 @@ public class UsersSession {
 	private static PreparedStatement INSERT_INTO_MAP;
 	private static PreparedStatement DELETE_ALL_VALUES;
 
-	private static final String USER_FORMAT = "- %-10s  %-16s %-10s %-10s\n";
 	private static final SimpleDateFormat df = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
 
@@ -61,7 +45,7 @@ public class UsersSession {
 		session.execute(bs);
 	}
 
-		public void deleteAll() {
+	public void deleteAll() {
 		BoundStatement bs = new BoundStatement(DELETE_ALL_VALUES);
 		session.execute(bs);
 

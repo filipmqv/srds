@@ -44,6 +44,7 @@ public class User implements Runnable {
         while (running) {
             int right = session.checkValue(Main.MAP_ID, row, col+1);
             int down = session.checkValue(Main.MAP_ID, row+1, col);
+            // TODO replace with one call with 4 directions up left down right
             if (isFinished(right, down)) {
                 // finish - immediately empty position
                 session.insertPosition(Main.MAP_ID, row, col, 0);

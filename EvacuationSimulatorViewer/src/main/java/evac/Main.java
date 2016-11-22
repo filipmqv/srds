@@ -18,34 +18,28 @@ package evac;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.PixelWriter;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Main extends Application {
 
-    public static final int ROW_COUNT = 600;
-    public static final int COL_COUNT = 600;
-    public static final int SCENE_ROW_COUNT = 700;
-    public static final int SCENE_COL_COUNT = 1200;
+    private static final int ROW_COUNT = 600;
+    private static final int COL_COUNT = 600;
+    private static final int SCENE_ROW_COUNT = 700;
+    private static final int SCENE_COL_COUNT = 1200;
     private static final double SCALE = 3;
-    private static Map<Integer, Color> colorMap = new HashMap<Integer, Color>();
+    private static Map<Integer, Color> colorMap = new HashMap<>();
 
     private static Color getColor(int key) {
         return (key <= 0)
@@ -63,7 +57,6 @@ public class Main extends Application {
         gc.clearRect(0, 0, Main.ROW_COUNT, Main.COL_COUNT);
         for (int i = 0; i < Main.ROW_COUNT; i++) {
             for (int j = 0; j < Main.COL_COUNT; j++) {
-                //drawSquare(gc, i, j, map[i][j]);
                 if (map[i][j] != -1)
                     drawPixel(pw, i, j, map[i][j]);
             }
@@ -83,7 +76,7 @@ public class Main extends Application {
         initColorMap();
 
         StackPane drawingPane = new StackPane();
-        drawingPane.setStyle("-fx-background-color: darkgray");
+        drawingPane.setStyle("-fx-background-color: #3d3d3d");
         drawingPane.setPrefSize(ROW_COUNT * SCALE, COL_COUNT * SCALE);
 
         ScrollPane scrollPane = new ScrollPane(drawingPane);
