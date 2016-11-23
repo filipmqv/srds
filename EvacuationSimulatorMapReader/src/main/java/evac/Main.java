@@ -41,7 +41,7 @@ public class Main {
                     session.insertPosition(MAP_ID, i, j, map[i][j]);
                 }
             }
-            System.out.println("finished " + i);
+            System.out.println(i);
         }
     }
 

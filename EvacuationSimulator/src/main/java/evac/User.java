@@ -10,8 +10,8 @@ public class User implements Runnable {
         public int getValue() { return id; }
     };
     private Map<Integer, Dir> reversedDir = new HashMap<>();
-    private Map<Dir, Integer> rowAddMap = new HashMap<>(); // direction; [row +-1?, col+-1?]
-    private Map<Dir, Integer> colAddMap = new HashMap<>(); // direction; [row +-1?, col+-1?]
+    private Map<Dir, Integer> rowAddMap = new HashMap<>(); // direction; row +-1?
+    private Map<Dir, Integer> colAddMap = new HashMap<>(); // direction; col+-1?
 
     private int id;
     private int row;
@@ -54,10 +54,6 @@ public class User implements Runnable {
         return valuesMap.get(d) >= -9 && valuesMap.get(d) <=0;
     }
 
-    /*private boolean isFinished(int right, int down) {
-        return right == -2 || down == -2;
-    }*/
-
     private void randomlySleepSafely(int min, int max) {
         try {
             Thread.sleep(ThreadLocalRandom.current().nextInt(min, max+1));
@@ -91,7 +87,6 @@ public class User implements Runnable {
                 continue;
             }*/
 
-            // TODO dodać sprawdzanie czy w losowych jest wolny - można po wylosowaniu; jeśi nie jest wolny to weź przeciwny, jeśli oba zajęte to nic
             Dir chosenDirection = null;
             switch (currentPositionDirection) {
                 case UP:
@@ -144,6 +139,7 @@ public class User implements Runnable {
                     break;
             }
 
+            // if direction not chosen, skip round
             if (chosenDirection == null) {
                 randomlySleepSafely(10, 20);
                 continue;
@@ -151,80 +147,18 @@ public class User implements Runnable {
 
             futurePositionDirection = reversedDir.get(valuesMap.get(chosenDirection));
             session.insertPosition(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection), id);
-            //System.out.println("rezerw " + chosenDirection + " r" + row + " rp" + rowPos(chosenDirection) + " c" + col + " cp" + colPos(chosenDirection));
-
-            /*Dir chosenDirection;
-            if (right == 0 && down == 0) {
-                //System.out.println(id + " BOTH "+ row +" " + col +" "+ right +" "+ down);
-                if (ThreadLocalRandom.current().nextInt(0, 2) == 0) {
-                    chosenDirection = Dir.RIGHT;
-                    session.insertPosition(Main.MAP_ID, row, col+1, id);
-                    //System.out.println(id + " BOTH RIGHT "+ row +" " + col +" "+ right +" "+ down);
-                } else {
-                    chosenDirection = Dir.DOWN;
-                    //System.out.println(id + " BOTH DOWN "+ row +" " + col +" "+ right +" "+ down);
-                    session.insertPosition(Main.MAP_ID, row+1, col, id);
-                }
-            } else if (right == 0) {
-                //System.out.println(id + " RIGHT "+ row +" " + col +" "+ right +" "+ down);
-                chosenDirection = Dir.RIGHT;
-                session.insertPosition(Main.MAP_ID, row, col+1, id);
-            } else if (down == 0) {
-                chosenDirection = Dir.DOWN;
-                //System.out.println(id + " DOWN "+ row +" " + col +" "+ right +" "+ down);
-                session.insertPosition(Main.MAP_ID, row+1, col, id);
-            } else { //no move down or right - try with possibility other dirctions
-
-                randomlySleepSafely(50, 100);
-                continue;
-            }*/
-
-            // TODO przed insertem należy do zmiennej zapisać jaki kierunek był na tym miejscu
 
             // wait to check if anyone changed our position
-            randomlySleepSafely(10, 20);
+            randomlySleepSafely(20, 30);
 
-            switch (chosenDirection) {
-                case RIGHT:
-                    if (session.checkValue(Main.MAP_ID, row, col+1) == id) {
-                        //System.out.println(id + " REMOVE RIGHT "+ row +" " + col );
-                        // TODO przywracanie do wartości previousPosDir i odpowiedni swap zmiennych
-                        session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
-                        col++;
-                        currentPositionDirection = futurePositionDirection;
-
-                    }
-                    break;
-                case DOWN:
-                    if (session.checkValue(Main.MAP_ID, row+1, col) == id) {
-                        //System.out.println(id + " REMOVE DOWN "+ row +" " + col +" ");
-                        session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
-                        row++;
-                        currentPositionDirection = futurePositionDirection;
-                        //randomlySleepSafely(10, 30);
-                    }
-                    break;
-                case LEFT:
-                    if (session.checkValue(Main.MAP_ID, row, col-1) == id) {
-                        //System.out.println(id + " REMOVE LEFT "+ row +" " + col +" ");
-                        session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
-                        col--;
-                        currentPositionDirection = futurePositionDirection;
-                        //randomlySleepSafely(10, 30);
-                    }
-                    break;
-                case UP:
-                    if (session.checkValue(Main.MAP_ID, row-1, col) == id) {
-                        //System.out.println(id + " REMOVE UP "+ row +" " + col +" ");
-                        session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
-                        row--;
-                        currentPositionDirection = futurePositionDirection;
-                        //randomlySleepSafely(10, 30);
-                    }
-                    break;
-                default:
-                    break;
+            // accept change, update current position and remove previous from DB
+            if (session.checkValue(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection)) == id) {
+                session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
+                row = rowPos(chosenDirection);
+                col = colPos(chosenDirection);
+                currentPositionDirection = futurePositionDirection;
             }
+
             randomlySleepSafely(10, 30);
         }
     }

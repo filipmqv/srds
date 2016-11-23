@@ -30,7 +30,7 @@ public class Main {
 
         //place all users on map; each on different spot
         // TODO place safely (with checking), randomly in START area (to launch 1+ instances)
-        int r=50, c=50;
+        int r=30, c=30;
         //int r=2, c=2;
         for (int i = 1; i < r; i++) {
             for (int j = 1; j < c; j++) {
