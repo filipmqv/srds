@@ -26,15 +26,18 @@ public class Main {
     private static int colCount = 0;
     private static final int MAP_ID = 1;
     private static int[][] map;
-    // (-3)=entry_pont; (-2)=goal_-_user_disappears; (-1)=wall, 0=free, 1+=occupied_by_user(id)
-    // (-4)=now right mainly, (-5)=now mainly down
+    // (-5)=entry_pont, random walk; (-10)=wall, 1+=occupied_by_user(id)
     // [row][col]
+    // main directions on pixel:
+    // -7 -8 -9
+    // -4    -6
+    // -1 -2 -3
     
     private static void initMap(UsersSession session) {
         session.deleteAll();
         for (int i = 0; i < rowCount; i++) {
             for (int j = 0; j < colCount; j++) {
-                if (map[i][j] != -1) {
+                if (map[i][j] != -10) {
                     session.insertPosition(MAP_ID, i, j, map[i][j]);
                 }
             }

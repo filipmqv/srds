@@ -22,28 +22,32 @@ import java.util.List;
 public class Main {
 
     static final int MAP_ID = 1;
-    // (-3)=entry_pont; (-2)=goal_-_user_disappears; (-1)=wall, 0=free, 1+=occupied_by_user(id)
 
 	public static void main(String[] args) throws IOException {
 		UsersSession session = new UsersSession("127.0.0.1");
 
-        List<Thread> users = new ArrayList<>();
+        List<Thread> userThreads = new ArrayList<>();
 
         //place all users on map; each on different spot
-        // TODO place safely (with checking), randomly in (-3) area
-        for (int i = 1; i < 30; i++) {
-            for (int j = 1; j < 30; j++) {
-                int userId = i*30+j;
-                users.add(new Thread(new User(userId, i, j, session)));
+        // TODO place safely (with checking), randomly in START area (to launch 1+ instances)
+        int r=50, c=50;
+        //int r=2, c=2;
+        for (int i = 1; i < r; i++) {
+            for (int j = 1; j < c; j++) {
+                int userId = i*r+j;
+                User u = new User(userId, i, j, session);
+                userThreads.add(new Thread(u));
                 session.insertPosition(MAP_ID, i, j, userId);
             }
         }
         
-        users.forEach(Thread::start);
+        userThreads.forEach(Thread::start);
 
         // working
 
-        users.forEach(thread -> {
+        System.out.println("users size: " + userThreads.size());
+
+        userThreads.forEach(thread -> {
             try {
                 thread.join();
             } catch (InterruptedException e) {

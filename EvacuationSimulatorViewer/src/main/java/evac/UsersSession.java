@@ -5,7 +5,8 @@ import com.datastax.driver.core.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UsersSession {
 
@@ -29,9 +30,6 @@ public class UsersSession {
 
 	private static PreparedStatement SELECT_ALL_MAP;
 
-	private static final SimpleDateFormat df = new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ss");
-
 	private void prepareStatements() {
         SELECT_ALL_MAP = session.prepare("SELECT * FROM Map;");
 		logger.info("Statements prepared");
@@ -40,19 +38,23 @@ public class UsersSession {
 	public int[][] selectAll() {
 		BoundStatement bs = new BoundStatement(SELECT_ALL_MAP);
 		ResultSet rs = session.execute(bs);
-        int[][] map = new int[600][600];
-		for (int i = 0; i < 600; i++) {
-			for (int j = 0; j < 600; j++) {
-				map[i][j] = -1;
+        int[][] map = new int[Main.ROW_COUNT][Main.COL_COUNT];
+		for (int i = 0; i < Main.ROW_COUNT; i++) {
+			for (int j = 0; j < Main.COL_COUNT; j++) {
+				map[i][j] = -10;
 			}
 		}
 		int users = 0;
+		Set<Integer> valueSet = new HashSet<>();
 		for (Row row : rs) {
             map[row.getInt("rowId")][row.getInt("colId")] = row.getInt("value");
-			if (row.getInt("value") > 0)
+
+			if (row.getInt("value") > 0) { // statistics about users
 				users++;
+				valueSet.add(row.getInt("value")); // can be less than actual no of users due to different moments of insert/delete
+			}
 		}
-		System.out.println(users);
+		System.out.println("count: " + users + " set:" + valueSet.size());
 
 		return map;
 	}

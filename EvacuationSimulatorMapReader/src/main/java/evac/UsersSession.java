@@ -1,9 +1,10 @@
 package evac;
 
 
-import java.text.SimpleDateFormat;
-
-import com.datastax.driver.core.*;
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,6 @@ public class UsersSession {
 
 	private static PreparedStatement INSERT_INTO_MAP;
 	private static PreparedStatement DELETE_ALL_VALUES;
-
-	private static final SimpleDateFormat df = new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ss");
 
 	private void prepareStatements() {
 		INSERT_INTO_MAP = session.prepare("INSERT INTO Map (mapId, rowId, colId, value) VALUES (?, ?, ?, ?);");
