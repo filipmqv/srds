@@ -44,7 +44,7 @@ public class Main extends Application {
     private static Color getColor(int key) {
         return (key <= 0)
                 ? colorMap.get(key)
-                : Color.hsb((key*key*40)%270, 0.5 + (0.1*key%0.5), 0.5 + (0.1*key%0.5));
+                : Color.hsb((key*43)%270, 0.5 + (0.1*key%0.5), 0.5 + (0.1*key%0.5));
     }
 
     private static void drawPixel(PixelWriter pw, int row, int col, int color) {

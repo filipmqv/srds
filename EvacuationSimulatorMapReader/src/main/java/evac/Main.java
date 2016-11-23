@@ -27,6 +27,7 @@ public class Main {
     private static final int MAP_ID = 1;
     private static int[][] map;
     // (-3)=entry_pont; (-2)=goal_-_user_disappears; (-1)=wall, 0=free, 1+=occupied_by_user(id)
+    // (-4)=now right mainly, (-5)=now mainly down
     // [row][col]
     
     private static void initMap(UsersSession session) {
