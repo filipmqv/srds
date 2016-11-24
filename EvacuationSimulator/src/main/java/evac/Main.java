@@ -17,29 +17,75 @@ package evac;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
 
     static final int MAP_ID = 1;
+    static int PROC_ID;
+    static int NUMBER_OF_USERS = 500;
+    static int START_ROW = 1;
+    static int START_COL = 1;
+    static int START_ROWS = 80; // max 99
+    static int START_COLS = 80; // max 99
 
-	public static void main(String[] args) throws IOException {
+
+    private static void parseArgs(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Put proc_id as first arg!");
+            System.exit(0);
+        }
+        PROC_ID = Integer.parseInt(args[0]);
+        if (args.length > 1) {
+            NUMBER_OF_USERS = Integer.parseInt(args[1]);
+        }
+        if (args.length > 2) {
+            START_ROW = Integer.parseInt(args[2]);
+            START_COL = Integer.parseInt(args[3]);
+            START_ROWS = Integer.parseInt(args[4]);
+            START_COLS = Integer.parseInt(args[5]);
+        }
+    }
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+	    parseArgs(args);
+
 		UsersSession session = new UsersSession("127.0.0.1");
 
         List<Thread> userThreads = new ArrayList<>();
 
-        //place all users on map; each on different spot
-        // TODO place safely (with checking), randomly in START area (to launch 1+ instances)
-        int r=30, c=30;
-        //int r=2, c=2;
-        for (int i = 1; i < r; i++) {
+        // reserve N random places in start area by putting PROC_ID as value
+        Set<Reservation> reservations = new HashSet<>();
+        while (reservations.size() < NUMBER_OF_USERS) {
+            int row = ThreadLocalRandom.current().nextInt(START_ROW, START_ROW + START_ROWS);
+            int col = ThreadLocalRandom.current().nextInt(START_COL, START_COL + START_COLS);
+            if (reservations.add(new Reservation(row, col))) {
+                session.insertPosition(MAP_ID, row, col, PROC_ID);
+            }
+        }
+
+        Thread.sleep(2000);
+
+        // place users on reserved spots if they still belong to PROC_ID
+        for (Reservation r : reservations) {
+            if (session.checkValue(MAP_ID, r.getRow(), r.getCol()) == PROC_ID) {
+                int userId = 10000 * PROC_ID + r.getRow() * START_COLS + r.getCol();
+                User u = new User(userId, r.getRow(), r.getCol(), session);
+                userThreads.add(new Thread(u));
+                session.insertPosition(MAP_ID, r.getRow(), r.getCol(), userId);
+            }
+        }
+        /*for (int i = START_ROW + ; i < r; i++) {
             for (int j = 1; j < c; j++) {
-                int userId = i*r+j;
+                int userId = 1000 * PROC_ID + i * r + j;
                 User u = new User(userId, i, j, session);
                 userThreads.add(new Thread(u));
                 session.insertPosition(MAP_ID, i, j, userId);
             }
-        }
+        }*/
         
         userThreads.forEach(Thread::start);
 

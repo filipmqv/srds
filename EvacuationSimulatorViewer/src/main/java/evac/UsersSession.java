@@ -51,7 +51,7 @@ public class UsersSession {
 
 			if (row.getInt("value") > 0) { // statistics about users
 				users++;
-				valueSet.add(row.getInt("value")); // can be less than actual no of users due to different moments of insert/delete
+				valueSet.add(row.getInt("value")); // can be less than actual number of users due to different moments of insert/delete
 			}
 		}
 		System.out.println("count: " + users + " set:" + valueSet.size());

@@ -62,14 +62,20 @@ public class User implements Runnable {
         }
     }
 
+    private boolean isFinished(Map<Dir, Integer> valuesMap) {
+        return valuesMap.get(Dir.DOWN) == 0 || valuesMap.get(Dir.RIGHT) == 0 || valuesMap.get(Dir.LEFT) == 0;
+    }
+
     @Override
     public void run() {
         // sprawdź w mapie możliwe kroki (prawo/dół?) czy ściana czy korytarz
         // sprawdź w bazie sprawdź czy wolne -> zajmij -> poczekaj -> sprawdź czy faktycznie jest zajęte ->
         // jeśli jest to przejdź na to pole i zwolnij poprzednie, a jak nie to próbuj od nowa zajmować
         boolean running = true;
-        randomlySleepSafely(2000, 2000);
+        randomlySleepSafely(5000, 5000);
 
+        int failureCounter = 0;
+        boolean fishedAnnouncedBefore = false;
 
         while (running) {
             Map<Dir, Integer> valuesMap = new HashMap<>(); // direction, value from DB
@@ -79,13 +85,17 @@ public class User implements Runnable {
             valuesMap.put(Dir.UP, session.checkValue(Main.MAP_ID, rowPos(Dir.UP), colPos(Dir.UP)));
 
 
-            /*if (isFinished(right, down)) {
+            if (isFinished(valuesMap)) {
                 // finish - immediately empty position
-                session.insertPosition(Main.MAP_ID, row, col, 0);
+                /*session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
                 running = false;
                 System.out.println(id + " exiting");
-                continue;
-            }*/
+                continue;*/
+                if (!fishedAnnouncedBefore) {
+                    fishedAnnouncedBefore = true;
+                    System.out.println(id + " finished");
+                }
+            }
 
             Dir chosenDirection = null;
             switch (currentPositionDirection) {
@@ -141,22 +151,30 @@ public class User implements Runnable {
 
             // if direction not chosen, skip round
             if (chosenDirection == null) {
-                randomlySleepSafely(10, 20);
+                randomlySleepSafely(10, 50);
+                failureCounter++;
+                // TODO to jest na pałę:
+                if (failureCounter == 1000 && row < 520 && col < 520) {
+                    System.out.println(id + " FAIL");
+                    failureCounter = 0;
+                }
                 continue;
             }
 
+            // insert reservation
             futurePositionDirection = reversedDir.get(valuesMap.get(chosenDirection));
             session.insertPosition(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection), id);
 
-            // wait to check if anyone changed our position
+            // wait to check if anyone changed our position reservation
             randomlySleepSafely(20, 30);
 
-            // accept change, update current position and remove previous from DB
+            // if reservation valid, accept change, update current position and remove previous from DB
             if (session.checkValue(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection)) == id) {
                 session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
                 row = rowPos(chosenDirection);
                 col = colPos(chosenDirection);
                 currentPositionDirection = futurePositionDirection;
+                failureCounter = 0;
             }
 
             randomlySleepSafely(10, 30);
