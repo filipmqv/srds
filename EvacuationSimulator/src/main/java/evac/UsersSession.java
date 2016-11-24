@@ -27,12 +27,10 @@ public class UsersSession {
 
 	private static PreparedStatement INSERT_INTO_MAP;
 	private static PreparedStatement CHECK_POSITION;
-	//private static PreparedStatement SELECT_ALL_MAP;
 
 	private void prepareStatements() {
 		INSERT_INTO_MAP = session.prepare("INSERT INTO Map (mapId, rowId, colId, value) VALUES (?, ?, ?, ?);");
 		CHECK_POSITION = session.prepare("SELECT value FROM Map WHERE mapId=? AND rowId=? AND colId=?;");
-		//SELECT_ALL_MAP = session.prepare("SELECT * FROM Map;");
 		logger.info("Statements prepared");
 	}
 
@@ -51,29 +49,6 @@ public class UsersSession {
 		bs.bind(mapId, rowId, colId, value);
 		session.execute(bs);
 	}
-
-	/*public int[][] selectAll() {
-		BoundStatement bs = new BoundStatement(SELECT_ALL_MAP);
-		ResultSet rs = session.execute(bs);
-		int[][] map = new int[Main.ROW_COUNT][Main.COL_COUNT];
-		for (int i = 0; i < Main.ROW_COUNT; i++) {
-			for (int j = 0; j < Main.COL_COUNT; j++) {
-				map[i][j] = -10;
-			}
-		}
-		//int users = 0;
-		//Set<Integer> valueSet = new HashSet<>();
-		for (Row row : rs) {
-			//map[row.getInt("rowId")][row.getInt("colId")] = row.getInt("value");
-			if (row.getInt("value") == Main.PROC_ID) { // statistics about users
-				users++;
-				valueSet.add(row.getInt("value")); // can be less than actual no of users due to different moments of insert/delete
-			}
-		}
-		System.out.println("count: " + users + " set:" + valueSet.size());
-
-		return map;
-	}*/
 
 	protected void finalize() {
 		try {
