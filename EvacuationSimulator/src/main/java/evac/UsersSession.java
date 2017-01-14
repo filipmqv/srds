@@ -18,8 +18,11 @@ public class UsersSession {
 		if (contactPoint == null || contactPoint.isEmpty())
 			contactPoint = DEFAULT_CONTACT_POINT;
 		
-		Cluster cluster = Cluster.builder()
-				.addContactPoint(contactPoint).build();
+		Cluster cluster = Cluster
+				.builder()
+				.addContactPoint(contactPoint)
+				.withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.QUORUM))
+				.build();
 		session = cluster.connect("EvacSim");
 		
 		prepareStatements();
