@@ -151,7 +151,7 @@ public class User implements Runnable {
 
             // if direction not chosen, skip round
             if (chosenDirection == null) {
-                randomlySleepSafely(10, 50);
+                randomlySleepSafely(40, 60);
                 failureCounter++;
                 // TODO to jest na pałę:
                 if (failureCounter == 1000 && row < 520 && col < 520) {
@@ -166,7 +166,7 @@ public class User implements Runnable {
             session.insertPosition(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection), id);
 
             // wait to check if anyone changed our position reservation
-            randomlySleepSafely(20, 30);
+            randomlySleepSafely(40, 60);
 
             // if reservation valid, accept change, update current position and remove previous from DB
             if (session.checkValue(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection)) == id) {
@@ -177,7 +177,7 @@ public class User implements Runnable {
                 failureCounter = 0;
             }
 
-            randomlySleepSafely(10, 30);
+            randomlySleepSafely(40, 60);
         }
     }
 

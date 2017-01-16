@@ -62,8 +62,10 @@ public class Main {
         while (reservations.size() < NUMBER_OF_USERS) {
             int row = ThreadLocalRandom.current().nextInt(START_ROW, START_ROW + START_ROWS);
             int col = ThreadLocalRandom.current().nextInt(START_COL, START_COL + START_COLS);
-            if (reservations.add(new Reservation(row, col))) {
-                session.insertPosition(MAP_ID, row, col, PROC_ID);
+            if (session.checkValue(MAP_ID, row, col) == -5) {
+                if (reservations.add(new Reservation(row, col))) {
+                    session.insertPosition(MAP_ID, row, col, PROC_ID);
+                }
             }
         }
 
@@ -86,6 +88,9 @@ public class Main {
                 session.insertPosition(MAP_ID, i, j, userId);
             }
         }*/
+
+        System.out.println("Press enter to start");
+        System.in.read();
         
         userThreads.forEach(Thread::start);
 
