@@ -26,7 +26,7 @@ public class Main {
 
     static final int MAP_ID = 1;
     static int PROC_ID;
-    static int NUMBER_OF_USERS = 1;//500;
+    static int NUMBER_OF_USERS = 500;
     static int START_ROW = 1;
     static int START_COL = 1;
     static int START_ROWS = 80; // max 99
