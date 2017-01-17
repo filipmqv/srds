@@ -21,7 +21,7 @@ public class UsersSession {
 		Cluster cluster = Cluster
 				.builder()
 				.addContactPoint(contactPoint)
-				.withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.QUORUM))
+				.withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
 				.build();
 		session = cluster.connect("EvacSim");
 		

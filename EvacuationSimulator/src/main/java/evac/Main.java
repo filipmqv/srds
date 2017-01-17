@@ -26,7 +26,7 @@ public class Main {
 
     static final int MAP_ID = 1;
     static int PROC_ID;
-    static int NUMBER_OF_USERS = 500;
+    static int NUMBER_OF_USERS = 1;//500;
     static int START_ROW = 1;
     static int START_COL = 1;
     static int START_ROWS = 80; // max 99
@@ -80,14 +80,6 @@ public class Main {
                 session.insertPosition(MAP_ID, r.getRow(), r.getCol(), userId);
             }
         }
-        /*for (int i = START_ROW + ; i < r; i++) {
-            for (int j = 1; j < c; j++) {
-                int userId = 1000 * PROC_ID + i * r + j;
-                User u = new User(userId, i, j, session);
-                userThreads.add(new Thread(u));
-                session.insertPosition(MAP_ID, i, j, userId);
-            }
-        }*/
 
         System.out.println("Press enter to start");
         System.in.read();

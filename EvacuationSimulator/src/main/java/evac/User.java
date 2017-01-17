@@ -4,20 +4,26 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class User implements Runnable {
-    private enum Dir {RIGHT(-6), DOWN(-2), LEFT(-4), UP(-8), RD(-3), RU(-9), LU(-7), LD(-1), START(-5), END(0);
-        private final int id;
-        Dir(int id) { this.id = id; }
-        public int getValue() { return id; }
-    };
-    private Map<Integer, Dir> reversedDir = new HashMap<>();
+    private enum Dir implements EnumConverter {
+        RIGHT(-6), DOWN(-2), LEFT(-4), UP(-8), RD(-3), RU(-9), LU(-7), LD(-1), START(-5), END(0);
+
+        private final byte value;
+
+        Dir(int value) {
+            this.value = (byte) value;
+        }
+
+        public int convert() {
+            return value;
+        }
+    }
+    private final ReverseEnumMap<Dir> reversedDir = new ReverseEnumMap<>(Dir.class);
     private Map<Dir, Integer> rowAddMap = new HashMap<>(); // direction; row +-1?
     private Map<Dir, Integer> colAddMap = new HashMap<>(); // direction; col+-1?
 
     private int id;
     private int row;
     private int col;
-    private Dir currentPositionDirection = Dir.RD;
-    private Dir futurePositionDirection = Dir.RD;
     private UsersSession session;
 
     public User(int id, int row, int col, UsersSession session) {
@@ -30,16 +36,6 @@ public class User implements Runnable {
         rowAddMap.put(Dir.RIGHT, 0); colAddMap.put(Dir.RIGHT, 1);
         rowAddMap.put(Dir.LEFT, 0); colAddMap.put(Dir.LEFT, -1);
         rowAddMap.put(Dir.UP, -1); colAddMap.put(Dir.UP, 0);
-        reversedDir.put(-1, Dir.LD);
-        reversedDir.put(-2, Dir.DOWN);
-        reversedDir.put(-3, Dir.RD);
-        reversedDir.put(-4, Dir.LEFT);
-        reversedDir.put(-5, Dir.START);
-        reversedDir.put(-6, Dir.RIGHT);
-        reversedDir.put(-7, Dir.LU);
-        reversedDir.put(-8, Dir.UP);
-        reversedDir.put(-9, Dir.RU);
-        reversedDir.put(0, Dir.END);
     }
 
     private int rowPos(Dir d) {
@@ -50,10 +46,6 @@ public class User implements Runnable {
         return col + colAddMap.get(d);
     }
 
-    private boolean isPositionFree(Map<Dir, Integer> valuesMap, Dir d) {
-        return valuesMap.get(d) >= -9 && valuesMap.get(d) <=0;
-    }
-
     private void randomlySleepSafely(int min, int max) {
         try {
             Thread.sleep(ThreadLocalRandom.current().nextInt(min, max+1));
@@ -62,107 +54,91 @@ public class User implements Runnable {
         }
     }
 
+    private Map<Dir, Integer> getValuesMap() {
+        Map<Dir, Integer> valuesMap = new HashMap<>();
+        valuesMap.put(Dir.RIGHT, session.checkValue(Main.MAP_ID, rowPos(Dir.RIGHT), colPos(Dir.RIGHT)));
+        valuesMap.put(Dir.DOWN, session.checkValue(Main.MAP_ID, rowPos(Dir.DOWN), colPos(Dir.DOWN)));
+        valuesMap.put(Dir.LEFT, session.checkValue(Main.MAP_ID, rowPos(Dir.LEFT), colPos(Dir.LEFT)));
+        valuesMap.put(Dir.UP, session.checkValue(Main.MAP_ID, rowPos(Dir.UP), colPos(Dir.UP)));
+        return valuesMap;
+    }
+
     private boolean isFinished(Map<Dir, Integer> valuesMap) {
         return valuesMap.get(Dir.DOWN) == 0 || valuesMap.get(Dir.RIGHT) == 0 || valuesMap.get(Dir.LEFT) == 0;
     }
 
+    private Dir chooseDirection(Map<Dir, Integer> valuesMap, Dir currentPositionDirection) {
+        switch (currentPositionDirection) {
+            case UP:
+            case DOWN:
+                return chooseDirectionIfFree(valuesMap, currentPositionDirection, Dir.LEFT, Dir.RIGHT);
+            case LEFT:
+            case RIGHT:
+                return chooseDirectionIfFree(valuesMap, currentPositionDirection, Dir.DOWN, Dir.UP);
+            case RD:
+                return chooseDirectionIfFree(valuesMap, null, Dir.RIGHT, Dir.DOWN);
+            case RU:
+                return chooseDirectionIfFree(valuesMap, null, Dir.RIGHT, Dir.UP);
+            case LD:
+                return chooseDirectionIfFree(valuesMap, null, Dir.LEFT, Dir.DOWN);
+            case LU:
+                return chooseDirectionIfFree(valuesMap, null, Dir.LEFT, Dir.UP);
+            case START:
+            case END:
+                return chooseDirectionIfFree(valuesMap, null, Dir.DOWN, Dir.RIGHT);
+            default:
+                return null;
+        }
+    }
+
+    private Dir chooseDirectionIfFree(Map<Dir, Integer> valuesMap, Dir currentPositionDirection, Dir option1, Dir option2) {
+        // decide to choose option if possible (position free)
+        if (currentPositionDirection != null && isPositionFree(valuesMap, currentPositionDirection)) {
+            return currentPositionDirection;
+        } else if (isPositionFree(valuesMap, option1) && isPositionFree(valuesMap, option2)) {
+            return (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? option1 : option2;
+        } else if (isPositionFree(valuesMap, option1)) {
+            return option1;
+        } else if (isPositionFree(valuesMap, option2)) {
+            return option2;
+        }
+        return null;
+    }
+
+    private boolean isPositionFree(Map<Dir, Integer> valuesMap, Dir d) {
+        return valuesMap.get(d) >= -9 && valuesMap.get(d) <=0;
+    }
+
     @Override
     public void run() {
-        // sprawdź w mapie możliwe kroki (prawo/dół?) czy ściana czy korytarz
-        // sprawdź w bazie sprawdź czy wolne -> zajmij -> poczekaj -> sprawdź czy faktycznie jest zajęte ->
-        // jeśli jest to przejdź na to pole i zwolnij poprzednie, a jak nie to próbuj od nowa zajmować
+        // check all 4 directions in DB (wall or empty or occupied position)
+        // if empty -> insert -> wait -> check if still mine -> free previous position
         boolean running = true;
         randomlySleepSafely(5000, 5000);
 
-        int failureCounter = 0;
         boolean fishedAnnouncedBefore = false;
+        Dir currentPositionDirection = Dir.RD;
 
         while (running) {
-            Map<Dir, Integer> valuesMap = new HashMap<>(); // direction, value from DB
-            valuesMap.put(Dir.RIGHT, session.checkValue(Main.MAP_ID, rowPos(Dir.RIGHT), colPos(Dir.RIGHT)));
-            valuesMap.put(Dir.DOWN, session.checkValue(Main.MAP_ID, rowPos(Dir.DOWN), colPos(Dir.DOWN)));
-            valuesMap.put(Dir.LEFT, session.checkValue(Main.MAP_ID, rowPos(Dir.LEFT), colPos(Dir.LEFT)));
-            valuesMap.put(Dir.UP, session.checkValue(Main.MAP_ID, rowPos(Dir.UP), colPos(Dir.UP)));
-
+            // check values of surrounding places from DB (can be empty-with next step direction, wall or other user)
+            Map<Dir, Integer> valuesMap = getValuesMap();
 
             if (isFinished(valuesMap)) {
-                // finish - immediately empty position
-                /*session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
-                running = false;
-                System.out.println(id + " exiting");
-                continue;*/
                 if (!fishedAnnouncedBefore) {
                     fishedAnnouncedBefore = true;
                     System.out.println(id + " finished");
                 }
             }
 
-            Dir chosenDirection = null;
-            switch (currentPositionDirection) {
-                case UP:
-                case DOWN:
-                    if (isPositionFree(valuesMap, currentPositionDirection)) {
-                        chosenDirection = currentPositionDirection;
-                    } else if (isPositionFree(valuesMap, Dir.LEFT) && isPositionFree(valuesMap, Dir.RIGHT)) {
-                        chosenDirection = (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? Dir.LEFT : Dir.RIGHT;
-                    } else if (isPositionFree(valuesMap, Dir.LEFT)) {
-                        chosenDirection = Dir.LEFT;
-                    } else if (isPositionFree(valuesMap, Dir.RIGHT)) {
-                        chosenDirection = Dir.RIGHT;
-                    } // else nothing
-                    break;
-                case LEFT:
-                case RIGHT:
-                    if (isPositionFree(valuesMap, currentPositionDirection)) {
-                        chosenDirection = currentPositionDirection;
-                    } else if (isPositionFree(valuesMap, Dir.DOWN) && isPositionFree(valuesMap, Dir.UP)) {
-                        chosenDirection = (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? Dir.DOWN : Dir.UP;
-                    } else if (isPositionFree(valuesMap, Dir.DOWN)) {
-                        chosenDirection = Dir.DOWN;
-                    } else if (isPositionFree(valuesMap, Dir.UP)) {
-                        chosenDirection = Dir.UP;
-                    } // else nothing
-                    break;
-                case RD:
-                    // TODO poprawić jeśli chosen jest zajęty to jeszcze sprawdzić drugi kierunek zamiast od razu null
-                    chosenDirection = (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? Dir.RIGHT : Dir.DOWN;
-                    chosenDirection = (isPositionFree(valuesMap, chosenDirection)) ? chosenDirection : null;
-                    break;
-                case RU:
-                    chosenDirection = (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? Dir.RIGHT : Dir.UP;
-                    chosenDirection = (isPositionFree(valuesMap, chosenDirection)) ? chosenDirection : null;
-                    break;
-                case LD:
-                    chosenDirection = (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? Dir.LEFT : Dir.DOWN;
-                    chosenDirection = (isPositionFree(valuesMap, chosenDirection)) ? chosenDirection : null;
-                    break;
-                case LU:
-                    chosenDirection = (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? Dir.LEFT : Dir.UP;
-                    chosenDirection = (isPositionFree(valuesMap, chosenDirection)) ? chosenDirection : null;
-                    break;
-                case START:
-                case END:
-                    chosenDirection = (ThreadLocalRandom.current().nextInt(0, 2) == 0) ? Dir.DOWN : Dir.RIGHT;
-                    chosenDirection = (isPositionFree(valuesMap, chosenDirection)) ? chosenDirection : null;
-                    break;
-                default:
-                    break;
-            }
+            Dir chosenDirection = chooseDirection(valuesMap, currentPositionDirection);
 
-            // if direction not chosen, skip round
+            // if direction is not chosen, skip round
             if (chosenDirection == null) {
                 randomlySleepSafely(40, 60);
-                failureCounter++;
-                // TODO to jest na pałę:
-                if (failureCounter == 1000 && row < 520 && col < 520) {
-                    System.out.println(id + " FAIL");
-                    failureCounter = 0;
-                }
                 continue;
             }
 
             // insert reservation
-            futurePositionDirection = reversedDir.get(valuesMap.get(chosenDirection));
             session.insertPosition(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection), id);
 
             // wait to check if anyone changed our position reservation
@@ -170,11 +146,10 @@ public class User implements Runnable {
 
             // if reservation valid, accept change, update current position and remove previous from DB
             if (session.checkValue(Main.MAP_ID, rowPos(chosenDirection), colPos(chosenDirection)) == id) {
-                session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.getValue());
+                session.insertPosition(Main.MAP_ID, row, col, currentPositionDirection.convert());
                 row = rowPos(chosenDirection);
                 col = colPos(chosenDirection);
-                currentPositionDirection = futurePositionDirection;
-                failureCounter = 0;
+                currentPositionDirection = reversedDir.get(valuesMap.get(chosenDirection));
             }
 
             randomlySleepSafely(40, 60);
