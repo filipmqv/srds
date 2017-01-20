@@ -14,4 +14,12 @@ For Cassandra to work on multiple endpoints first delete <cassandra>/data direct
 - rpc_address: localhost
 - endpoint_snitch: SimpleSnitch
 
-Launch MapReader and Viewer, then main EvacuationSimulator with proper app arguments.
+then start ntp (syncronize clocks):
+* ntpd start
+* ntpq -p 
+
+start cassandra and create schema:
+* cassandra -f
+* cqlsh -f <file_to_create_schema>
+
+launch MapReader and Viewer, then main EvacuationSimulator with proper app arguments.
