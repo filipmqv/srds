@@ -3,7 +3,7 @@
 Project written in Java + Cassandra. 
 
 For Cassandra to work on multiple endpoints first delete <cassandra>/data directory, then edit: 
-<cassandra>/conf/cassandra.yaml:
+cassandra_directory/conf/cassandra.yaml:
 - cluster_name: ’any_name’
 - num_tokens: 256
 - seed_provider:
@@ -20,6 +20,6 @@ then start ntp (syncronize clocks):
 
 start cassandra and create schema:
 * cassandra -f
-* cqlsh -f <file_to_create_schema>
+* cqlsh -f file_to_create_schema
 
 launch MapReader and Viewer, then main EvacuationSimulator with proper app arguments.
